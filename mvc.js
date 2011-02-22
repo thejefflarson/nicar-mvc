@@ -110,7 +110,6 @@
     
     constructor : function(options){
       this.models = [];
-      this.length = 0;
       MVCObject.call(this, options);
     },
     
@@ -119,7 +118,6 @@
       object.collection = this;
       model.bind('all', this._onModelEvent);
       this.models.push(object);
-      this.length++;
       this.trigger("added:" + model.cid, model, this);
       return model;
     },
@@ -127,7 +125,6 @@
     pop : function(object){
       var model = this.models.pop(object);
       model.unbind('all', this._onModelEvent);
-      this.length--;
       this.trigger("removed:" + model.cid, model, this);
       return model;
     },
