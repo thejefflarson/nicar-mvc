@@ -61,7 +61,7 @@
   };
   
   var mixin = function(obj){
-    var objects = Array.prototype.slice.call(Arguments, 1);
+    var objects = Array.prototype.slice.call(arguments, 1);
     for(var i = 0; i < objects.length; i++) {
       var mixin = objects[i];
       for(var key in mixin) obj[key] = mixin[key];
@@ -81,6 +81,7 @@
     child.prototype = new ctor();
     if(protoProps) mixin(child.prototype, protoProps);
     child.prototype.constructor = child;
+    return child;
   };
   
   var extend = function(protoProps){
