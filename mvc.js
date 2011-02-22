@@ -1,4 +1,4 @@
-(function(){
+(function(window, document, undefined){
   
   var Events = {
     bind : function(e, cb){
@@ -38,10 +38,14 @@
           this.trigger("change:" + attr, this, value, attr);
         }
       }
+      return this;
     },
     
     unSet : function(key){
-      
+      if(this.attributes[key]) {
+        delete this.attributes[key];
+        this.trigger("change:" + key, this, undefined, key);
+      }
     },
     
     get : function(key){
@@ -53,18 +57,57 @@
     for(var key in mixin) obj[key] = mixin[key];
   };
   
+  var ctor = function(){};
+  var inherits = function(parent, protoProps){
+    var child;
+    if(protoProps.hasOwnProperty('constructor')){
+      child = protoProps.constructor;
+    } else {
+      child = function(){ return parent.apply(this, arguments); };
+    };
+    ctor.prototype  = parent.prototype;
+    child.__super__ = parent.prototype;
+    child.prototype = new ctor();
+    if(protoProps) mixin(child.prototype, protoProps);
+    child.prototype.constructor = child;
+  };
+  
+  var extend = function(protoProps){
+    var child = inherits(this, protoProps);
+    child.extend = extend
+    return child;
+  };
+
+  
   var MVCObject = function(attributes){ };
+  MVCObject.extend = extend;
   mixin(MVCObject.prototype, Events);
   
-  var MVCCollection = function(attributes){ };
+  var Collection = function(attributes){
+    this.models = [];
+    this.length = 0;
+  };
+  
+  Collection.prototype.push = function(object){
+    if(!(object instanceof MVCObject)) object = new this.model(object);
+    object.collection = this;
+    this.models.push(object);
+    this.length++;
+    this.trigger("added:" + model.cid, model, this);
+    return model;
+  };
+    
+  Collection.prototype.pop = function(object){
+    var model = this.models.pop(object);
+    this.length--;
+    this.trigger("removed:" + model.cid, model, this);
+    return model;
+  };
   mixin(MVCCollection.prototype, Events);
   
   
   var Model;
   mixin(Model.prototype, Attributes);
-  
-  var Collection;
-  mixin(MVCCollection.prototype, Attributes);
-  
+    
   var View;
-})();
+})(window, document);
