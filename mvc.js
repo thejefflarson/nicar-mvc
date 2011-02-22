@@ -95,12 +95,12 @@
     this.cid = this.type + idCounter++;
     if(this.initialize) this.initialize(attributes, options);
   };
-  
   MVCObject.prototype.type = "MVCObject";
   MVCObject.prototype.toString = function(){
     return "<" + this.type + " cid:" + this.cid + ">";
   };
   MVCObject.extend = extend;
+  
   
   var Model = MVCObject.extend({
     type: "Model",
@@ -112,6 +112,7 @@
   });
   mixin(Model.prototype, Attributes);
   mixin(Model.prototype, Events);
+  
   
   var View = MVCObject.extend({
     type: "View",
@@ -132,7 +133,7 @@
       var suffix = ".delegate" + this.cid;
       this.el.unbind(suffix);
       var view = this;
-      for(var ev in this.events){
+      for(var ev in this.bindings){
         var callback = function() { view[ev].call(view, Array.prototype.slice.call(arguments)); };
         this.el.bind(ev + suffix, callback);
       }
