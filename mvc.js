@@ -91,30 +91,69 @@
   };
 
   var idCounter = 1;
+  var MVCObject = function(attributes, options){
+    this.cid = this.type + idCounter++;
+    if(this.initialize) this.initialize(attributes, options);
+  };
   
-  var MVCObject = function(options){
-    this.cid = idCounter++;
-    if(this.initialize) this.initialize(options);
+  MVCObject.prototype.type = "MVCObject";
+  MVCObject.prototype.toString = function(){
+    return "<" + this.type + " cid:" + this.cid + ">";
   };
   MVCObject.extend = extend;
   
-  var Model = MVCObject.extend({});
+  var Model = MVCObject.extend({
+    type: "Model",
+    
+    constructor : function(attributes, options){
+      this.set(attributes);
+      MVCObject.call(this, attributes, options);
+    }
+  });
   mixin(Model.prototype, Attributes);
   mixin(Model.prototype, Events);
   
-  var View = MVCObject.extend({});
+  var View = MVCObject.extend({
+    type: "View",
+    el : null,
+    bindings : {},
+
+    constructor : function(attributes, options){
+      if(attributes.el) this.el = attributes.el;
+      if(this.el) this.setBindings();
+      MVCObject.call(this, attributes, options);
+    },
+    
+    $ : function(query){
+      return $(query, this.el);
+    },
+    
+    setBindings : function(){
+      var suffix = ".delegate" + this.cid;
+      this.el.unbind(suffix);
+      var view = this;
+      for(var ev in this.events){
+        var callback = function() { view[ev].call(view, Array.prototype.slice.call(arguments)); };
+        this.el.bind(ev + suffix, callback);
+      }
+    },
+    
+    render : function(){
+      return this;
+    }
+  });
   
   
   var Collection = MVCObject.extend({
     model : Model,
     
-    constructor : function(options){
+    constructor : function(attributes, options){
       this.models = [];
       MVCObject.call(this, options);
     },
     
     push : function(object){
-      if(!(object instanceof MVCObject)) object = new this.model(object);
+      if(!(object instanceof Model)) object = new this.model(object);
       object.collection = this;
       model.bind('all', this._onModelEvent);
       this.models.push(object);
@@ -140,6 +179,11 @@
         var model;
         for(var i = 0; model = this.models[i]; i++) cb(model);
       }
+    },
+    
+    populate : function(models){
+      for(var i = 0; i < models.length; i++)
+        this.push(models[i]);
     },
     
     _onModelEvent : function(){
