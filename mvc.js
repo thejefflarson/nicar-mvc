@@ -22,7 +22,14 @@
       if(!this._callbacks) return;
       var list = this._callbacks[e];
       if(!list) return;
-      for(var i = 0; i < list.length; i++) list[i].apply(this, arguments);
+      
+      for(var i = 0; i < list.length; i++) 
+        list[i].apply(this, arguments);
+        
+      if(list['all']) {
+        for(var i = 0; i < list['all'].length; i++) 
+          list['all'][i].apply(this, arguments);
+      }
     }
   };
   
@@ -53,8 +60,12 @@
     }
   };
   
-  var mixin = function(obj, mixin){
-    for(var key in mixin) obj[key] = mixin[key];
+  var mixin = function(obj){
+    var objects = Array.prototype.slice.call(Arguments, 1);
+    for(var i = 0; i < objects.length; i++) {
+      var mixin = objects[i];
+      for(var key in mixin) obj[key] = mixin[key];
+    }
   };
   
   var ctor = function(){};
@@ -74,40 +85,57 @@
   
   var extend = function(protoProps){
     var child = inherits(this, protoProps);
-    child.extend = extend
+    child.extend = extend;
     return child;
   };
 
+  var idCounter = 1;
   
-  var MVCObject = function(attributes){ };
+  var MVCObject = function(options){
+    this.cid = idCounter++;
+    if(this.initialize) this.initialize(options);
+  };
   MVCObject.extend = extend;
-  mixin(MVCObject.prototype, Events);
   
-  var Collection = function(attributes){
-    this.models = [];
-    this.length = 0;
-  };
-  
-  Collection.prototype.push = function(object){
-    if(!(object instanceof MVCObject)) object = new this.model(object);
-    object.collection = this;
-    this.models.push(object);
-    this.length++;
-    this.trigger("added:" + model.cid, model, this);
-    return model;
-  };
-    
-  Collection.prototype.pop = function(object){
-    var model = this.models.pop(object);
-    this.length--;
-    this.trigger("removed:" + model.cid, model, this);
-    return model;
-  };
-  mixin(MVCCollection.prototype, Events);
-  
-  
-  var Model;
+  var Model = MVCObject.extend({});
   mixin(Model.prototype, Attributes);
+  mixin(Model.prototype, Events);
+  
+  var View = MVCObject.extend({});
+  
+  
+  var Collection = MVCObject.extend({
+    model : Model,
     
-  var View;
+    constructor : function(options){
+      this.models = [];
+      this.length = 0;
+      MVCObject.call(this, options);
+    },
+    
+    push : function(object){
+      if(!(object instanceof MVCObject)) object = new this.model(object);
+      object.collection = this;
+      model.bind('all', this._onModelEvent);
+      this.models.push(object);
+      this.length++;
+      this.trigger("added:" + model.cid, model, this);
+      return model;
+    },
+    
+    pop : function(object){
+      var model = this.models.pop(object);
+      model.unbind('all', this._onModelEvent);
+      this.length--;
+      this.trigger("removed:" + model.cid, model, this);
+      return model;
+    },
+    
+    _onModelEvent : function(){
+      this.trigger.apply(this, arguments);
+    }
+  });
+  mixin(Collection.prototype, Events);
+  
+    
 })(window, document);
