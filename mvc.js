@@ -27,7 +27,7 @@
         list[i].apply(this, arguments);
         
       if(list['all']) {
-        for(var i = 0; i < list['all'].length; i++) 
+        for(i = 0; i < list['all'].length; i++) 
           list['all'][i].apply(this, arguments);
       }
     }
@@ -129,6 +129,19 @@
       this.length--;
       this.trigger("removed:" + model.cid, model, this);
       return model;
+    },
+    
+    length : function(){
+      return this.models.length;
+    },
+    
+    forEach : function(cb){
+      if(this.models.forEach) {
+        this.models.forEach(cb);
+      } else {
+        var model;
+        for(var i = 0; model = this.models[i]; i++) cb(model);
+      }
     },
     
     _onModelEvent : function(){
