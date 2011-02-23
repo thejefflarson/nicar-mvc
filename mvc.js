@@ -11,8 +11,8 @@
       if(!(this._callbacks && this._callbacks[e])) return;
       var events = this._callbacks[e];
       for(var i = 0; i < events.length; i++){
-        if(list[i] === cb) { 
-          list.splice(i, 1);
+        if(events[i] === cb) { 
+          events.splice(i, 1);
           break;
         }
       }
@@ -36,11 +36,11 @@
   var Attributes = {
     set : function(attrs){
       if (!attrs) return this;
-      var attributes = this.attributes; 
+      var attributes = (this.attributes = this.attributes || {}); 
       if ('id' in attrs) this.id = attrs.id;
       for(var attr in attrs){
         var value = attrs[attr];
-        if(!value === attributes[attr]){
+        if(!(value === attributes[attr])){
           attributes[attr] = value;
           this.trigger("change:" + attr, this, value, attr);
         }
@@ -193,5 +193,9 @@
   });
   mixin(Collection.prototype, Events);
   
-    
+  mixin(window, {
+    View: View,
+    Model: Model,
+    Collection: Collection
+  });
 })(window, document);
