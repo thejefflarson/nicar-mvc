@@ -1,12 +1,20 @@
 (function(window, document, undefined){
-  
+  // **Events** 
+  // Events are a way to publish messages from objects and subscribe to the
+  // events from others. In this framework we'll use events primarily on 
+  // models.
   var Events = {
+    
+    // bind takes an event name and a callback and adds it to a special lookup 
+    // object so that we can trigger the event later
     bind : function(e, cb){
       var callbacks = (this._callbacks = this._callbacks || {});
       var events    = (callbacks[e] = callbacks[e] || []);
       events.push(cb);
     },
     
+    // unbind will remove a particular callback from the list, essentially 
+    // unsubscribing from the event.
     unbind : function(e, cb){
       if(!(this._callbacks && this._callbacks[e])) return;
       var events = this._callbacks[e];
@@ -18,6 +26,7 @@
       }
     },
     
+    // trigger fires an event and the associated callbacks
     trigger : function(e){
       if(!this._callbacks) return;
       var list = this._callbacks[e];
@@ -33,7 +42,13 @@
     }
   };
   
+  // ** Attributes **
+  // Each model has a special set of attributes, that tracks it's associated 
+  // data. Each attribute will notify subscribers of changes.
   var Attributes = {
+    
+    // Every time an attribute is set, we trigger a change event, and take 
+    // care to handle the model's id property.
     set : function(attrs){
       if (!attrs) return this;
       var attributes = (this.attributes = this.attributes || {}); 
@@ -48,6 +63,7 @@
       return this;
     },
     
+    // unSet notifies subscribers and removes the attribute.
     unSet : function(key){
       if(this.attributes[key]) {
         delete this.attributes[key];
@@ -55,11 +71,15 @@
       }
     },
     
+    // get returns the requested attribute from the attributes object.
     get : function(key){
       return this.attributes[key];
     }
   };
   
+  // **Utilities**
+  // In order to provide the functionality of Attributes and Events to multiple
+  // constructors we'll "mixin" the functions defined into the host object.
   var mixin = function(obj){
     var objects = Array.prototype.slice.call(arguments, 1);
     for(var i = 0; i < objects.length; i++) {
@@ -68,6 +88,20 @@
     }
   };
   
+  // **Prototypal Inheritance **
+  // A big point of confusion in JavaScript is that inheritance doesn't seem 
+  // to exist. It does, but in JavaScript it's prototypal, that is each object
+  // has an associated prototype that provides essentially a blueprint on how to
+  // create an object. And those prototypes can have prototypes as well.
+  //
+  // An easy way to think of it is to look at Aristotle and Wittgenstein.
+  //
+  // Aristotle represents classical inheritance, that every object has a concrete
+  // pattern it inherits from, for example a Sparrow is a type of Bird.
+  //
+  // Wittgenstein, held, that the world was composed of traits, for example a 
+  // magazine isn't a book just because it has pages, rather magazines and books
+  // have a pages trait.
   var ctor = function(){};
   var inherits = function(parent, protoProps){
     var child;
@@ -84,12 +118,15 @@
     return child;
   };
   
+  // A self propagating extend function that we'll attach to our objects.
   var extend = function(protoProps){
     var child = inherits(this, protoProps);
     child.extend = extend;
     return child;
   };
 
+  // The base class for all our objects, it takes care of ensuring that each
+  // object has a unique id, and provides niceties like string formatting.
   var idCounter = 1;
   var MVCObject = function(attributes){
     this.cid = this.type + idCounter++;
@@ -101,53 +138,19 @@
   };
   MVCObject.extend = extend;
   
-  
+  // The model is largely a container for data.
   var Model = MVCObject.extend({
     type: "Model",
     
     constructor : function(attributes){
       this.set(attributes);
       MVCObject.call(this, attributes);
-    },
-    
-    
-  });
-  mixin(Model.prototype, Attributes);
-  mixin(Model.prototype, Events);
-  
-  
-  var View = MVCObject.extend({
-    type: "View",
-    el : null,
-    bindings : {},
-
-    constructor : function(attributes){
-      attributes = (attributes || {});
-      if(attributes.el) this.el = attributes.el;
-      if(this.el) this.setBindings();
-      MVCObject.call(this, attributes);
-    },
-    
-    $ : function(query){
-      return $(query, this.el);
-    },
-    
-    setBindings : function(){
-      var suffix = ".delegate" + this.cid;
-      this.el.unbind(suffix);
-      var view = this;
-      for(var ev in this.bindings){
-        var method   = this[this.bindings[ev]];
-        var callback = function() { method.call(view, Array.prototype.slice.call(arguments)); };
-        this.el.bind(ev + suffix, callback);
-      }
-    },
-    
-    render : function(){
-      return this;
     }
   });
-  
+  // Each model has both Events and Attributes, here we're using the prototypal
+  // nature of JavaScript to provide the functionality.
+  mixin(Model.prototype, Attributes);
+  mixin(Model.prototype, Events);
   
   var Collection = MVCObject.extend({
     model : Model,
@@ -197,6 +200,41 @@
   });
   mixin(Collection.prototype, Events);
   
+  
+  var View = MVCObject.extend({
+    type: "View",
+    el : null,
+    bindings : {},
+
+    constructor : function(attributes){
+      attributes = (attributes || {});
+      if(attributes.el) this.el = attributes.el;
+      if(this.el) this.setBindings();
+      MVCObject.call(this, attributes);
+    },
+    
+    $ : function(query){
+      return $(query, this.el);
+    },
+    
+    setBindings : function(){
+      var suffix = ".delegate" + this.cid;
+      this.el.unbind(suffix);
+      var view = this;
+      for(var ev in this.bindings){
+        var method   = this[this.bindings[ev]];
+        var callback = function() { method.call(view, Array.prototype.slice.call(arguments)); };
+        this.el.bind(ev + suffix, callback);
+      }
+    },
+    
+    render : function(){
+      return this;
+    }
+  });
+  
+  
+
   mixin(window, {
     View: View,
     Model: Model,
