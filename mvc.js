@@ -91,9 +91,9 @@
   };
 
   var idCounter = 1;
-  var MVCObject = function(attributes, options){
+  var MVCObject = function(attributes){
     this.cid = this.type + idCounter++;
-    if(this.initialize) this.initialize(attributes, options);
+    if(this.initialize) this.initialize(attributes);
   };
   MVCObject.prototype.type = "MVCObject";
   MVCObject.prototype.toString = function(){
@@ -105,10 +105,12 @@
   var Model = MVCObject.extend({
     type: "Model",
     
-    constructor : function(attributes, options){
+    constructor : function(attributes){
       this.set(attributes);
-      MVCObject.call(this, attributes, options);
-    }
+      MVCObject.call(this, attributes);
+    },
+    
+    
   });
   mixin(Model.prototype, Attributes);
   mixin(Model.prototype, Events);
@@ -119,10 +121,11 @@
     el : null,
     bindings : {},
 
-    constructor : function(attributes, options){
+    constructor : function(attributes){
+      attributes = (attributes || {});
       if(attributes.el) this.el = attributes.el;
       if(this.el) this.setBindings();
-      MVCObject.call(this, attributes, options);
+      MVCObject.call(this, attributes);
     },
     
     $ : function(query){
@@ -134,7 +137,8 @@
       this.el.unbind(suffix);
       var view = this;
       for(var ev in this.bindings){
-        var callback = function() { view[ev].call(view, Array.prototype.slice.call(arguments)); };
+        var method   = this[this.bindings[ev]];
+        var callback = function() { method.call(view, Array.prototype.slice.call(arguments)); };
         this.el.bind(ev + suffix, callback);
       }
     },
