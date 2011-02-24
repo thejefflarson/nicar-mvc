@@ -1,0 +1,1128 @@
+<!DOCTYPE html>  <html> <head>   <title>app.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="app.html">                 app.js               </a>                                           <a class="source" href="mvc.html">                 mvc.js               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               app.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-1">#</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+  </pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-2">#</a>               </div>               <h2>Models</h2>             </td>             <td class="code">               <div class="highlight"><pre>  </pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-3">#</a>               </div>               <p>Each county will contain the associated census data. It doesn't need anymore
+functionalit than the original model, so we wont pass anything in.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="kd">var</span> <span class="nx">County</span> <span class="o">=</span> <span class="nx">Model</span><span class="p">.</span><span class="nx">extend</span><span class="p">({});</span>
+  </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-4">#</a>               </div>               <p>The Counties collection just needs to know to create a County constructor
+when data is passed to <code>populate</code></p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="kd">var</span> <span class="nx">Counties</span> <span class="o">=</span> <span class="nx">Collection</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>    
+    <span class="nx">model</span><span class="o">:</span> <span class="nx">County</span>
+  <span class="p">});</span>
+  </pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-5">#</a>               </div>               <h2>Views</h2>             </td>             <td class="code">               <div class="highlight"><pre>  </pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-6">#</a>               </div>               <p>The Map is our most complex view. It keeps track of a ToolTip and proxies
+to raphael to draw the SVG shapes.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="kd">var</span> <span class="nx">Map</span> <span class="o">=</span> <span class="nx">View</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-7">#</a>               </div>               <p>The set of bindings and associated functions to call when events are 
+triggered.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">bindings</span> <span class="o">:</span> <span class="p">{</span>
+      <span class="s2">&quot;mousemove&quot;</span><span class="o">:</span> <span class="s2">&quot;moveToolTip&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;mouseleave&quot;</span><span class="o">:</span> <span class="s2">&quot;hideToolTip&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;mouseenter&quot;</span><span class="o">:</span> <span class="s2">&quot;showToolTip&quot;</span>
+    <span class="p">},</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-8">#</a>               </div>               <p>Upon initialization the map will begin listening in on the counties collection
+so it can draw the map when a model is added.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">initialize</span> <span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
+      <span class="kd">var</span> <span class="nx">map</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">collection</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span> 
+        <span class="nx">map</span><span class="p">.</span><span class="nx">drawShape</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+      <span class="p">});</span>
+    <span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-9">#</a>               </div>               <p>Hide the DOM element that contains the tooltip when the mouseleaves the 
+map.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">hideToolTip</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">toolTip</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+    <span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-10">#</a>               </div>               <p>And show the tooltip when it enters.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">showToolTip</span> <span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">toolTip</span><span class="p">.</span><span class="nx">show</span><span class="p">();</span>
+    <span class="p">},</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-11">#</a>               </div>               <p>Move the toolTip as the user mouses around.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">moveToolTip</span> <span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">toolTip</span><span class="p">.</span><span class="nx">css</span><span class="p">({</span>
+        <span class="nx">left</span> <span class="o">:</span> <span class="nx">e</span><span class="p">.</span><span class="nx">pageX</span> <span class="o">+</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="nx">top</span> <span class="o">:</span> <span class="nx">e</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">+</span> <span class="mi">10</span>
+      <span class="p">});</span>
+    <span class="p">},</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-12">#</a>               </div>               <p>To render the map we first need to setup the Raphael canvas. 
+(The second line here is not cross browser compatible).</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">render</span> <span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">paper</span> <span class="o">=</span> <span class="nx">Raphael</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">el</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="k">this</span><span class="p">.</span><span class="nx">el</span><span class="p">.</span><span class="nx">width</span><span class="p">(),</span> <span class="k">this</span><span class="p">.</span><span class="nx">el</span><span class="p">.</span><span class="nx">height</span><span class="p">());</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">paper</span><span class="p">.</span><span class="nx">canvas</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="s1">&#39;viewBox&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">314.56698</span><span class="p">,</span> <span class="mf">238.637</span><span class="p">,</span> <span class="mf">57.87900000000002</span><span class="p">,</span> <span class="mf">50.831999999999994</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">));</span>
+    <span class="p">},</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-13">#</a>               </div>               <p>Every time a county is added to a collection this function is called.
+It sets up some styles and triggers events to notify the bar chart.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">drawShape</span> <span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="nx">model</span><span class="p">,</span> <span class="nx">collection</span><span class="p">){</span>
+      <span class="kd">var</span> <span class="nx">map</span>  <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+      <span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">paper</span><span class="p">.</span><span class="nx">path</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;svg&quot;</span><span class="p">));</span>
+      
+      <span class="nx">path</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+        <span class="s2">&quot;stroke&quot;</span><span class="o">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vector-effect&quot;</span><span class="o">:</span><span class="s2">&quot;non-scaling-stroke&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;stroke-width&quot;</span><span class="o">:</span> <span class="mf">0.1</span><span class="p">,</span> 
+        <span class="s2">&quot;fill&quot;</span><span class="o">:</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cursor&quot;</span><span class="o">:</span> <span class="s2">&quot;pointer&quot;</span>
+      <span class="p">});</span>
+      
+      <span class="nx">path</span><span class="p">.</span><span class="nx">hover</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">path</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span><span class="s2">&quot;fill&quot;</span><span class="o">:</span> <span class="s2">&quot;#D1DCE9&quot;</span><span class="p">});</span>
+        <span class="nx">map</span><span class="p">.</span><span class="nx">toolTip</span><span class="p">.</span><span class="nx">html</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&lt;br&gt;Diversity Index: &quot;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;diversity_index&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">|</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;%&quot;</span><span class="p">);</span>
+        <span class="nx">model</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s2">&quot;current&quot;</span><span class="p">,</span> <span class="nx">model</span><span class="p">);</span>
+      <span class="p">},</span> 
+      <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">path</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span><span class="s2">&quot;fill&quot;</span><span class="o">:</span> <span class="s2">&quot;white&quot;</span><span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">}</span>
+    
+  <span class="p">});</span>
+  </pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-14">#</a>               </div>               <p>The BarChart view displays a simple barchart showing ethnicity breakdowns.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="kd">var</span> <span class="nx">BarChart</span> <span class="o">=</span> <span class="nx">View</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-15">#</a>               </div>               <p>On creation the BarChart starts listening to any <code>current</code> events, so
+it can update it's associated DOM Element.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">initialize</span> <span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
+      <span class="kd">var</span> <span class="nx">chart</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">collection</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="s2">&quot;current&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span> 
+        <span class="nx">chart</span><span class="p">.</span><span class="nx">drawChart</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">chart</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+      <span class="p">});</span>
+    <span class="p">},</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-16">#</a>               </div>               <p>The callback for the <code>current</code> event. In here the barchart will reset the
+html and recreate a barchart from scratch.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">drawChart</span> <span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="nx">model</span><span class="p">){</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">el</span><span class="p">.</span><span class="nx">html</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+      <span class="kd">var</span> <span class="nx">showFields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>  <span class="s2">&quot;hispanic&quot;</span><span class="p">,</span> <span class="s2">&quot;asian&quot;</span><span class="p">];</span>
+      <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">showFields</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+        <span class="kd">var</span> <span class="nx">bar</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;&lt;div /&gt;&quot;</span><span class="p">);</span>
+        <span class="nx">bar</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;bar&quot;</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">inner</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;&lt;div /&gt;&quot;</span><span class="p">);</span>
+        <span class="nx">inner</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;inner&quot;</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="nx">showFields</span><span class="p">[</span><span class="nx">i</span><span class="p">]).</span><span class="nx">css</span><span class="p">({</span><span class="s2">&quot;height&quot;</span><span class="o">:</span> <span class="nx">model</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">showFields</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">+</span> <span class="s2">&quot;%&quot;</span><span class="p">});</span>
+        <span class="nx">bar</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">inner</span><span class="p">)</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">el</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">bar</span><span class="p">)</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+  </pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-17">#</a>               </div>               <h2>Setting Up The Room</h2>             </td>             <td class="code">               <div class="highlight"><pre>  </pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-18">#</a>               </div>               <p>After the document is ready we'll grab a bunch of jQuery references and 
+construct the Views</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-19">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-19">#</a>               </div>               <p>First we'll set up the collection.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">counties</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Counties</span><span class="p">();</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-20">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-20">#</a>               </div>               <p>Then we'll grab a reference to the BarChart container</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">barChart</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BarChart</span><span class="p">({</span>
+      <span class="nx">el</span> <span class="o">:</span> <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#chart&quot;</span><span class="p">),</span>
+      <span class="nx">collection</span> <span class="o">:</span> <span class="nx">counties</span>
+    <span class="p">});</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-21">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-21">#</a>               </div>               <p>And set up the map with the toolTip reference.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Map</span><span class="p">({</span>
+      <span class="nx">collection</span> <span class="o">:</span> <span class="nx">counties</span><span class="p">,</span>
+      <span class="nx">el</span> <span class="o">:</span> <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#map&quot;</span><span class="p">),</span>
+      <span class="nx">toolTip</span> <span class="o">:</span> <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#tool-tip&quot;</span><span class="p">)</span>
+    <span class="p">});</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-22">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-22">#</a>               </div>               <p>We'll also need a Raphael Canvas</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">map</span><span class="p">.</span><span class="nx">render</span><span class="p">();</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-23">             <td class="docs">               <div class="octowrap">                 <a class="octothorpe" href="#section-23">#</a>               </div>               <p>And finally we'll populate the data which will trigger <code>add</code> events to notify
+the map View.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">counties</span><span class="p">.</span><span class="nx">populate</span><span class="p">([</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.795282729</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Acadia Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.013209655</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.002638693</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.180904279</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.349899948</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.9828404</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">9.71298</span><span class="nx">e</span><span class="o">-</span><span class="mi">05</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 330.91798,271.887 L 332.45898,271.841 L 335.21798,271.738 L 336.00098,272.265 L 336.45198,273.743 L 336.45198,274.027 L 334.94298,276.037 L 334.06898,277.034 L 333.83898,277.195 L 333.62198,277.295 L 333.42398,277.362 L 331.29198,276.926 L 331.16998,276.89 L 330.91798,271.887&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.78602302</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.017159601</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.005649718</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.002217797</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.715533302</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Allen Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.016068933</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.024142214</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.232300885</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.442824676</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.986725664</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000232883</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 328.61498,266.693 L 331.10698,266.527 L 331.14298,267.745 L 331.16098,268.226 L 331.25598,270.579 L 331.40398,270.714 L 331.42798,270.773 L 331.10698,271.553 L 331.00798,271.728 L 330.93698,271.801 L 329.33998,271.85 L 328.45698,272.314 L 326.68998,272.585 L 325.39698,272.809 L 325.33798,270.565 L 326.26198,270.528 L 327.01498,270.507 L 326.96098,267.911 L 326.90598,266.901 L 328.61498,266.693&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.7093619</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.013274336</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.004890545</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.006831237</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.732845218</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Ascension Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.01221844</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003161871</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.222412909</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.444751337</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.953140885</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000755491</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 350.33398,272.774 L 352.36198,274.667 L 352.60098,274.829 L 352.65498,274.844 L 352.69998,274.82 L 353.30498,274.207 L 353.24098,274.919 L 349.72598,276.402 L 348.13998,276.533 L 348.91398,273.153 L 350.33398,272.774&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.708380357</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.046859115</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.019111132</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.00949494</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.667563298</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Assumption Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.008923616</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.005678664</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.304897314</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.473350979</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.978737031</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000512361</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 349.72598,276.402 L 350.70798,278.427 L 349.48298,280.945 L 348.68898,282.126 L 348.44598,281.198 L 348.47298,280.368 L 348.46398,279.882 L 348.37798,279.715 L 348.23798,279.57 L 348.00898,279.449 L 347.89198,279.449 L 347.40398,279.354 L 347.23798,279.192 L 346.62898,278.034 L 346.53498,277.791 L 346.84598,277.078 L 348.13998,276.533 L 349.72598,276.402&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">7</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.65932283</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.021262969</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.009948337</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.00247641</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.669978371</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Avoyelles Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.016209921</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.011955411</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.294678297</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.475421161</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.985596463</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">7.13046</span><span class="nx">e</span><span class="o">-</span><span class="mi">05</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 336.51998,260.646 L 337.39098,260.736 L 337.39098,261.168 L 337.58798,261.971 L 337.63798,262.024 L 338.16098,262.057 L 338.37298,261.931 L 338.33698,261.845 L 338.20498,261.686 L 338.09798,261.425 L 338.17398,261.227 L 338.30098,261.097 L 338.49398,261.063 L 338.71998,261.119 L 339.33198,261.421 L 339.57998,261.764 L 339.82898,261.921 L 340.35098,262.06 L 340.72098,262.111 L 340.77698,262.097 L 340.97798,262.201 L 341.10498,262.353 L 340.81098,263.846 L 340.75698,264.034 L 340.67598,264.228 L 340.40198,264.571 L 339.77798,266.802 L 335.38398,266.978 L 334.57698,265.509 L 335.27198,265.14 L 335.00598,263.341 L 334.91498,260.88 L 335.01498,260.794 L 335.09098,260.763 L 335.13698,260.771 L 335.82098,261.092 L 336.51998,260.646&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.662586457</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.014403537</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.003755378</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.003351318</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.822376171</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Beauregard Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.024148763</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.009984854</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.130560386</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.336266338</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.971868514</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000476805</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 326.90598,266.901 L 326.96098,267.911 L 327.01498,270.507 L 326.26198,270.528 L 325.33798,270.565 L 325.39698,272.809 L 325.40598,273.076 L 322.57898,273.161 L 322.55198,272.034 L 321.42598,272.061 L 321.45698,273.193 L 318.60498,273.269 L 318.61698,273.257 L 319.04198,272.9 L 319.08698,272.788 L 319.09098,272.721 L 318.93398,271.917 L 318.62298,271.542 L 318.59098,271.508 L 318.59098,271.503 L 318.71698,271.052 L 320.29898,268.073 L 320.49798,267.208 L 322.01198,266.982 L 325.18998,266.897 L 326.90598,266.901&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">11</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.805800191</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.028131486</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.006170416</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.006282605</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.552846095</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Bienville Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.012262245</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003483592</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.423326134</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.523493049</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.985577928</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 327.26298,244.83 L 328.44398,246.494 L 328.16898,250.468 L 326.81998,250.5 L 324.10398,250.576 L 321.46198,249.522 L 322.00298,247.255 L 323.47698,247.21 L 324.43298,246.601 L 324.41798,246.281 L 324.03998,244.933 L 327.26298,244.83&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">13</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.546923988</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.014422072</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.005713091</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.002368843</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.721753477</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Bossier Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.021815882</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.005479616</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.209105908</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.473904488</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.939937938</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.001393413</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 320.18598,239.426 L 320.09698,239.895 L 320.09698,240.089 L 320.29898,240.449 L 320.67698,241.013 L 320.98398,241.333 L 321.09698,242.734 L 321.16798,246.138 L 321.25898,247.268 L 322.00298,247.255 L 321.46198,249.522 L 320.99298,249.517 L 320.03298,248.269 L 318.82498,247.625 L 317.46898,243.46 L 317.35598,242.851 L 316.89198,239.642 L 316.90998,239.593 L 317.02698,239.494 L 317.13098,239.494 L 320.18598,239.426&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">15</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.692355038</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.060062062</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.023978663</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.016473042</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.4900282</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Caddo Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.014739047</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.004282874</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.471680871</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.551602502</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.975961784</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000494178</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 317.02698,239.494 L 316.90998,239.593 L 316.89198,239.642 L 317.35598,242.851 L 317.46898,243.46 L 318.82498,247.625 L 320.03298,248.269 L 320.99298,249.517 L 319.43498,249.554 L 319.42498,249.13 L 319.32098,248.973 L 319.06898,248.702 L 318.84298,248.535 L 317.95498,248.237 L 317.76598,248.197 L 317.55998,248.242 L 317.40098,248.342 L 317.34298,248.39 L 316.80098,249.03 L 316.77098,249.22 L 316.79298,249.297 L 316.75698,249.409 L 316.37398,249.762 L 315.78698,250.18 L 314.79198,250.198 L 314.65198,243.771 L 314.60698,241.337 L 314.56698,239.548 L 317.02698,239.494&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">17</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.478367959</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.024038216</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.008251984</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.010522848</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.708177706</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Calcasieu Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.019090305</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.00465845</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.247873091</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.45533308</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.974347402</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000482445</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 325.40598,273.076 L 325.41498,273.373 L 326.57698,274.874 L 327.75398,276.182 L 328.02798,276.515 L 328.22698,277.087 L 327.03698,277.155 L 327.05098,277.723 L 325.57698,277.773 L 325.57198,277.583 L 318.95498,277.767 L 318.93798,277.785 L 318.94598,275.294 L 318.60498,273.269 L 321.45698,273.193 L 321.42598,272.061 L 322.55198,272.034 L 322.57898,273.161 L 325.40598,273.076&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">19</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.69359541</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.025652598</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.008964143</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.01075386</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.810600079</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Caldwell Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.008882748</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.002171338</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.172325306</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.33796079</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.978089222</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 333.57198,248.584 L 336.58798,248.468 L 338.17398,250.027 L 338.41298,250.347 L 338.47198,250.455 L 338.49898,250.789 L 337.92698,251.14 L 338.18398,252.05 L 338.33098,252.348 L 337.09298,252.974 L 333.74398,253.104 L 333.63498,250.283 L 333.57198,248.584&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">21</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.79401895</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.021910778</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.003553099</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.00246743</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.957157479</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Cameron Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.010820295</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.005263928</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.017400205</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.108811572</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.977482088</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 329.93098,277.641 L 331.30598,277.583 L 331.47298,281.991 L 331.48998,283.487 L 331.08398,283.384 L 330.05298,283.042 L 329.11898,282.636 L 328.60598,282.415 L 327.81698,282.041 L 327.44398,281.891 L 327.42898,281.888 L 326.14098,281.473 L 325.13498,281.229 L 324.57098,281.157 L 324.12098,281.161 L 321.79498,281.342 L 321.08698,281.436 L 320.00698,281.599 L 319.46498,281.683 L 318.81698,281.838 L 318.78398,281.851 L 318.72198,281.874 L 318.54498,281.932 L 318.18098,282.126 L 317.95998,282.275 L 317.75298,282.451 L 317.65298,279.576 L 318.93798,277.785 L 318.95498,277.767 L 325.57198,277.583 L 325.57698,277.773 L 327.05098,277.723 L 329.93098,277.641&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">23</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.945313642</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.022517912</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.008480772</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.000877321</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.671182858</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Catahoula Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.007302777</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003267032</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.31517248</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.456572388</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.991351975</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 337.09298,252.974 L 338.33098,252.348 L 338.48898,252.397 L 338.76498,252.573 L 339.15698,252.97 L 339.41798,253.371 L 339.57998,253.578 L 340.09998,253.434 L 340.37798,253.231 L 340.77698,252.79 L 340.97398,252.456 L 340.99098,252.348 L 341.54098,252.609 L 341.80698,253.344 L 342.21698,255.007 L 340.70598,255.196 L 340.61698,255.277 L 339.43698,256.697 L 339.36398,256.823 L 338.95398,258.487 L 338.89498,258.855 L 338.94498,260.812 L 338.98198,260.93 L 339.33198,261.421 L 338.71998,261.119 L 338.49398,261.063 L 338.30098,261.097 L 338.17398,261.227 L 338.09798,261.425 L 338.20498,261.686 L 338.33698,261.845 L 338.37298,261.931 L 338.16098,262.057 L 337.63798,262.024 L 337.58798,261.971 L 337.39098,261.168 L 337.39098,260.736 L 337.09298,252.974&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">25</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.66743538</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.008648025</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.002786586</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.000288268</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.474963652</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Claiborne Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.008374528</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003663856</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.507880198</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.523423623</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.990055249</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">5.81564</span><span class="nx">e</span><span class="o">-</span><span class="mi">05</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 325.91898,239.277 L 328.75798,239.224 L 328.86698,242.517 L 327.26298,244.83 L 324.03998,244.933 L 324.06698,244.298 L 323.90398,243.23 L 323.35598,243.253 L 323.22898,239.35 L 325.91898,239.277&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">27</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.470136668</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.009944751</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.002675196</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.002384414</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.574344443</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Concordia Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.008596677</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003121698</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.408846412</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.510346138</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.98996254</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000192105</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 342.21698,255.007 L 344.03398,255.179 L 343.86098,255.475 L 343.85298,255.485 L 342.67698,257.847 L 342.64998,257.9 L 342.60898,257.987 L 342.60498,257.996 L 342.19498,261.357 L 341.92898,262.746 L 341.66198,264.761 L 341.39698,265.148 L 341.42898,264.837 L 340.67598,264.228 L 340.75698,264.034 L 340.81098,263.846 L 341.10498,262.353 L 340.97798,262.201 L 340.77698,262.097 L 340.72098,262.111 L 340.35098,262.06 L 339.82898,261.921 L 339.57998,261.764 L 339.33198,261.421 L 338.98198,260.93 L 338.94498,260.812 L 338.89498,258.855 L 338.95398,258.487 L 339.36398,256.823 L 339.43698,256.697 L 340.61698,255.277 L 340.70598,255.196 L 342.21698,255.007&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">29</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.568101047</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.01003746</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.002545385</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.00235328</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.579831933</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;De Soto Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.011554622</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.007653061</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.391994298</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.527194188</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.975202581</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000412665</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 319.43498,249.554 L 320.15898,250.099 L 320.57798,251.482 L 321.26798,252.556 L 321.38498,252.7 L 322.36698,253.425 L 321.45698,254.574 L 316.67998,254.701 L 315.14298,252.984 L 314.79198,250.198 L 315.78698,250.18 L 316.37398,249.762 L 316.75698,249.409 L 316.79298,249.297 L 316.77098,249.22 L 316.80098,249.03 L 317.34298,248.39 L 317.40098,248.342 L 317.55998,248.242 L 317.76598,248.197 L 317.95498,248.237 L 318.84298,248.535 L 319.06898,248.702 L 319.32098,248.973 L 319.42498,249.13 L 319.43498,249.554&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">31</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.566176471</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.024797419</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.006977791</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.00157563</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.488280691</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;East Baton Rouge Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.013263027</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.002492213</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.453244307</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.57493472</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.963028005</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000306699</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 350.54598,267.933 L 349.91498,268.872 L 349.18998,269.739 L 349.22698,271.521 L 349.43798,272.049 L 350.33398,272.774 L 348.91398,273.153 L 347.56698,273.203 L 345.62898,269.092 L 345.95798,268.438 L 346.07198,268.353 L 350.54598,267.933&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">33</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.469508441</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.036971995</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.014317163</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.028095899</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.28934141</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;East Carroll Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.00747519</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.002448769</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.690295141</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.452568128</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.983631911</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 345.53798,238.637 L 345.18298,239.21 L 345.06998,239.62 L 345.08798,239.724 L 345.95298,243.644 L 346.01698,243.798 L 346.02898,243.82 L 346.06298,243.86 L 346.07498,243.884 L 346.09798,243.902 L 346.20098,243.992 L 346.22798,244.015 L 346.57098,244.122 L 346.64798,244.298 L 342.69198,244.821 L 342.79798,244.245 L 343.10598,243.951 L 343.20898,243.637 L 343.53298,242.392 L 343.69898,240.963 L 343.74898,240.584 L 344.14198,239.43 L 344.47498,238.678 L 345.53798,238.637&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">35</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.283283928</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.016368089</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.004768656</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.005670834</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.53204717</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;East Feliciana Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.011151132</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003157843</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.449400503</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.523298249</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.989737011</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">9.86826</span><span class="nx">e</span><span class="o">-</span><span class="mi">05</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 348.02198,264.459 L 350.60498,264.314 L 350.27098,265.153 L 350.49198,266.27 L 350.54598,266.991 L 350.54598,267.933 L 346.07198,268.353 L 345.95798,268.438 L 345.62898,269.092 L 345.54298,269.051 L 345.51698,268.749 L 345.53798,268.326 L 345.69998,267.82 L 345.81398,267.667 L 346.25998,266.901 L 346.58398,265.414 L 346.74098,264.522 L 348.02198,264.459&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">37</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.526274239</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.010262989</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.001578921</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.002565747</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.689706921</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Evangeline Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.010828625</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.002913136</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.283427495</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.458330391</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.977165725</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">8.82768</span><span class="nx">e</span><span class="o">-</span><span class="mi">05</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 331.10698,266.527 L 333.45998,265.086 L 334.57698,265.509 L 335.38398,266.978 L 335.87498,268.001 L 335.90298,268.704 L 335.91598,269.2 L 335.45598,270.593 L 334.99198,270.994 L 333.29698,271.057 L 332.92798,271.125 L 332.81198,271.256 L 332.45898,271.841 L 330.91798,271.887 L 330.93698,271.801 L 331.00798,271.728 L 331.10698,271.553 L 331.42798,270.773 L 331.40398,270.714 L 331.25598,270.579 L 331.16098,268.226 L 331.14298,267.745 L 331.10698,266.527&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">39</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.678878296</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.022834275</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.009681026</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.00335452</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.67077575</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Franklin Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.007800838</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.001781673</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.314778254</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.458472417</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.990561949</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.00028892</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 342.51498,249.156 L 341.80698,253.344 L 341.54098,252.609 L 340.99098,252.348 L 340.97398,252.456 L 340.77698,252.79 L 340.37798,253.231 L 340.09998,253.434 L 339.57998,253.578 L 339.41798,253.371 L 339.15698,252.97 L 338.76498,252.573 L 338.48898,252.397 L 338.33098,252.348 L 338.18398,252.05 L 337.92698,251.14 L 338.49898,250.789 L 338.47198,250.455 L 338.41298,250.347 L 338.17398,250.027 L 339.03998,249.116 L 339.52998,247.985 L 340.47298,246.862 L 340.87898,246.624 L 342.56398,246.534 L 342.51498,249.156&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">41</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.667067944</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.009438051</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.002552126</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.002022439</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.813528173</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Grant Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.015778385</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.010220091</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.155542606</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.366303907</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.958267964</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.0003586</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 326.62298,256.183 L 330.43098,256.044 L 330.47198,255.521 L 330.45798,254.912 L 333.26198,254.817 L 333.38798,256.45 L 333.74798,257.445 L 334.26698,258.167 L 334.76798,258.717 L 335.24398,258.855 L 334.07698,259.154 L 330.50298,260.168 L 330.20998,260.208 L 329.87598,260.091 L 329.80098,260.037 L 329.65198,259.373 L 329.48898,258.558 L 326.62298,256.183&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">43</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.778206105</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.041732036</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.001927473</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.002644673</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.621941562</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Iberia Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.015524304</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003672856</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.319975423</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.526207003</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.968610049</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000273075</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 338.42698,282.784 L 339.25998,282.482 L 339.52698,282.424 L 339.90098,282.478 L 341.66798,283.258 L 341.69798,283.307 L 341.67798,283.392 L 341.05398,284.263 L 340.92298,284.344 L 340.48598,284.479 L 340.29698,284.425 L 338.13398,283.389 L 337.96298,283.204 L 338.42698,282.784M 345.20998,276.726 L 346.84598,277.078 L 346.53498,277.791 L 344.12298,278.105 L 342.41998,278.322 L 341.51398,279.642 L 339.73798,281.324 L 338.63498,280.306 L 338.56598,277.345 L 338.70498,276.839 L 339.19298,276.83 L 340.75698,276.294 L 340.96398,276.168 L 341.11398,276.128 L 341.43298,276.114 L 341.83298,276.2 L 341.93298,276.235 L 343.87598,276.799 L 345.20998,276.726&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">45</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.607618788</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.031389951</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.014664118</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.023948662</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.48761494</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Iberville Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.008027076</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.00185701</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.492826549</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.532043584</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.98011202</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">8.98553</span><span class="nx">e</span><span class="o">-</span><span class="mi">05</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 343.64598,271.151 L 344.01998,271.43 L 345.24598,272.761 L 345.67898,273.306 L 347.56698,273.203 L 348.91398,273.153 L 348.13998,276.533 L 346.84598,277.078 L 345.20998,276.726 L 345.19998,276.556 L 345.07898,276.263 L 343.91598,274.591 L 343.72298,274.506 L 343.51498,274.464 L 343.16298,274.496 L 342.93398,274.478 L 342.78898,274.41 L 342.64598,274.292 L 342.24898,273.631 L 342.18598,273.454 L 342.16198,273.379 L 342.18598,273.224 L 342.15798,272.549 L 342.10898,272.297 L 341.95598,271.932 L 341.24798,271.26 L 343.64598,271.151&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">47</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.478839069</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.01988798</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.006469584</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.003114985</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.681086396</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Jackson Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.011859408</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.00215067</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.298205727</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.455934422</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.987157429</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000122895</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 328.44398,246.494 L 330.12898,246.443 L 330.10198,245.886 L 332.34198,245.807 L 332.38298,246.845 L 332.44598,247.003 L 333.55398,248.026 L 333.57198,248.584 L 333.63498,250.283 L 328.16898,250.468 L 328.44398,246.494&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">49</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.675248863</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.012842571</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.004854369</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.001720536</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.629091994</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Jefferson Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.021317668</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.004711572</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.263290888</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.60166365</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.875848453</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000413823</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 357.24798,273.855 L 357.64098,273.915 L 359.19498,274.239 L 359.16298,276.348 L 359.91598,277.372 L 360.51598,277.98 L 360.06998,278.746 L 359.86098,279.611 L 359.98498,280.03 L 360.34498,280.513 L 360.56498,280.769 L 361.01198,281.531 L 361.06998,281.775 L 361.23298,283.704 L 360.67798,283.889 L 359.99798,283.591 L 359.09698,282.262 L 359.16298,282.021 L 359.15398,281.891 L 359.02398,280.986 L 358.99298,280.887 L 358.87498,280.815 L 358.50598,280.729 L 358.22198,280.742 L 358.38398,280.242 L 358.44698,280.044 L 358.63198,278.972 L 357.95098,278.566 L 357.60898,278.038 L 357.53698,277.827 L 357.42398,277.186 L 357.39698,276.74 L 357.24798,273.855M 360.36198,286.827 L 360.37198,286.837 L 360.68298,286.777 L 360.92598,286.503 L 361.57498,286.003 L 361.66998,286.016 L 361.68898,286.053 L 361.67898,286.084 L 361.62098,286.178 L 360.91198,286.705 L 360.30398,287.337 L 360.19898,287.445 L 360.19598,287.449 L 360.36198,286.827&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">51</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.560089885</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.124151547</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.042605282</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.038568773</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.795245933</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Jefferson Davis Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.018611129</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.004969298</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.173070836</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.351965405</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.98297145</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">9.49547</span><span class="nx">e</span><span class="o">-</span><span class="mi">05</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 330.91798,271.887 L 331.16998,276.89 L 329.93098,277.641 L 327.05098,277.723 L 327.03698,277.155 L 328.22698,277.087 L 328.02798,276.515 L 327.75398,276.182 L 326.57698,274.874 L 325.41498,273.373 L 325.40598,273.076 L 325.39698,272.809 L 326.68998,272.585 L 328.45698,272.314 L 329.33998,271.85 L 330.93698,271.801 L 330.91798,271.887&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">53</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.786066975</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.01702855</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.006045452</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.001962398</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.693688002</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Lafayette Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.016229048</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.00336676</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.257575211</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.478847009</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.961201022</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.00036556</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 336.45198,274.027 L 338.12498,273.058 L 338.70498,276.839 L 338.56598,277.345 L 337.41198,276.88 L 336.69998,276.384 L 335.77298,276.078 L 334.94298,276.037 L 336.45198,274.027&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">55</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.672323065</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.038798978</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.013742339</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.015033081</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.793673041</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Lafourche Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.017971719</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.02806329</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.132332482</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.373853659</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.962135842</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000342615</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 354.57498,278.382 L 355.17998,278.777 L 356.15298,279.813 L 356.73098,280.557 L 356.73498,280.635 L 356.83798,280.774 L 356.97398,280.806 L 358.22198,280.742 L 358.50598,280.729 L 358.87498,280.815 L 358.99298,280.887 L 359.02398,280.986 L 359.15398,281.891 L 359.16298,282.021 L 359.09698,282.262 L 359.99798,283.591 L 360.67798,283.889 L 360.69198,285.349 L 360.02498,286.169 L 360.36198,286.827 L 360.19598,287.449 L 360.07298,287.57 L 360.04298,287.606 L 359.32198,288.202 L 359.28498,288.233 L 359.25498,288.252 L 358.74398,288.526 L 357.41498,288.968 L 357.35198,288.964 L 357.35198,288.954 L 357.33898,288.887 L 357.60498,288.724 L 357.84298,288.68 L 357.96998,288.657 L 358.07698,288.602 L 358.35298,288.468 L 358.40598,288.436 L 358.60498,288.211 L 358.59098,287.973 L 358.11298,287.025 L 357.92398,286.768 L 357.56498,286.286 L 357.36498,286.141 L 356.98298,286.201 L 356.76698,286.489 L 356.56398,287.228 L 356.84698,285.812 L 356.77898,285.21 L 356.71198,285.019 L 356.55098,284.849 L 354.43598,282.677 L 351.66898,280.039 L 351.51998,280.021 L 351.44398,280.057 L 349.48298,280.945 L 350.70798,278.427 L 353.28198,278.489 L 354.57498,278.382&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">57</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.779501236</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.037864158</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.020255819</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.007361033</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.852182673</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;La Salle Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.009603761</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.010208193</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.118804567</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.281460212</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.977770316</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000134318</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 333.74398,253.104 L 337.09298,252.974 L 337.39098,260.736 L 336.51998,260.646 L 335.24398,258.855 L 334.76798,258.717 L 334.26698,258.167 L 333.74798,257.445 L 333.38798,256.45 L 333.26198,254.817 L 333.74398,253.104&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">59</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.840832774</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.022229684</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.007186031</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.001880457</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.551513855</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Lincoln Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.010762812</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.002631861</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.404942762</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.543431097</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.974558682</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000727506</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 328.86698,242.517 L 329.75898,242.491 L 330.22298,242.545 L 330.57498,242.622 L 332.26098,243.555 L 332.30598,244.682 L 332.34198,245.807 L 330.10198,245.886 L 330.12898,246.443 L 328.44398,246.494 L 327.26298,244.83 L 328.86698,242.517&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">61</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.54162833</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.025441318</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.012517385</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.016903819</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.918571228</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Livingston Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.01145861</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.004108541</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.050809992</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.18626801</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.970310718</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000203084</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 349.91498,268.872 L 353.71898,268.65 L 353.84098,270.75 L 354.11098,271.426 L 354.97698,272.625 L 355.35498,273.014 L 355.48598,273.121 L 355.62598,273.184 L 355.83198,273.232 L 355.08498,273.486 L 354.83198,273.622 L 354.76098,273.684 L 354.59298,274.055 L 354.45298,274.27 L 354.30598,274.424 L 354.16998,274.51 L 354.05698,274.527 L 353.93598,274.506 L 353.30498,274.207 L 352.69998,274.82 L 352.65498,274.844 L 352.60098,274.829 L 352.36198,274.667 L 350.33398,272.774 L 349.43798,272.049 L 349.22698,271.521 L 349.18998,269.739 L 349.91498,268.872&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">63</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.901082593</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.029689282</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.009943293</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.004905254</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.371950715</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Madison Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.009178864</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.001984619</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.610353097</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.500463801</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.984453816</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 346.64798,244.298 L 346.40298,245.123 L 346.42198,245.33 L 346.42198,245.344 L 346.45298,245.389 L 346.49898,245.461 L 346.50798,245.484 L 347.71098,246.764 L 347.78698,248.625 L 346.52998,248.781 L 346.52998,248.769 L 346.52698,248.489 L 346.38598,248.372 L 346.32198,248.372 L 345.83098,248.454 L 344.62798,248.842 L 344.43898,248.977 L 344.38498,249.08 L 342.51498,249.156 L 342.56398,246.534 L 342.69198,244.821 L 346.64798,244.298&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">65</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.363516084</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.015546184</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.004300008</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.002232697</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.512705958</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Morehouse Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.009793059</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.001286679</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.469387755</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.522966121</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.990886022</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000500375</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 342.36998,238.768 L 342.63598,238.753 L 342.57198,239.03 L 341.06298,242.126 L 340.66698,243.239 L 340.67998,243.289 L 340.58098,243.595 L 340.43198,243.865 L 340.32898,243.977 L 339.66098,244.312 L 338.93098,244.559 L 338.17398,245.097 L 337.77798,245.457 L 336.01598,242.721 L 336.06498,242.681 L 336.14598,242.505 L 336.11398,241.824 L 335.72298,240.715 L 335.82098,239.034 L 342.36998,238.768&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">67</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.509346295</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.009113978</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.002680582</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.003645591</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.5432442</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Natchitoches Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.02135672</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.009503109</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.413536875</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.542856651</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.981423444</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000278017</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 324.10398,250.576 L 326.81998,250.5 L 327.21298,251.226 L 327.44398,252.059 L 327.51598,253.015 L 327.49698,253.173 L 327.29898,254.078 L 326.62298,256.183 L 329.48898,258.558 L 326.68098,260.862 L 323.87798,260.718 L 323.80598,258.473 L 322.70198,258.505 L 322.61998,256.233 L 321.49298,256.26 L 321.45698,254.574 L 322.36698,253.425 L 322.42698,253.852 L 322.74598,253.965 L 323.18398,253.965 L 323.63898,253.759 L 324.65298,252.559 L 324.71198,251.811 L 324.70698,251.753 L 324.49898,251.103 L 324.23398,250.703 L 324.10398,250.576&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">69</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.533513623</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.018576556</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.008694334</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.003386746</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.329896547</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Orleans Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.017217861</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003045118</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.601668271</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.558820312</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.947500065</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000389729</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 359.19498,274.239 L 360.43098,274.708 L 361.47598,274.081 L 361.73398,273.981 L 363.90898,274.153 L 364.52798,274.355 L 364.59998,274.4 L 364.12098,274.969 L 362.62598,275.929 L 362.12498,276.528 L 361.62498,278.255 L 360.51598,277.98 L 359.91598,277.372 L 359.16298,276.348 L 359.19498,274.239&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">71</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.304715425</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.052499935</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.018785501</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.028996972</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.604241478</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Ouachita Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.011319282</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.002478532</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.365703877</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.512372539</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.982045277</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000331772</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 336.01598,242.721 L 337.77798,245.457 L 336.58798,248.468 L 333.57198,248.584 L 333.55398,248.026 L 332.44598,247.003 L 332.38298,246.845 L 332.34198,245.807 L 332.30598,244.682 L 333.96998,244.628 L 334.26698,244.537 L 334.37898,244.46 L 335.79398,243.076 L 336.01598,242.721&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">73</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.595712985</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.017954723</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.006459797</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.009465262</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.705060325</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Plaquemines Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.027124382</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.016101033</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.204626335</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.493363572</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.953693256</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.001345369</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 360.51598,277.98 L 361.62498,278.255 L 361.78198,278.584 L 362.02898,279.013 L 362.16998,279.179 L 362.24198,279.192 L 362.36398,279.147 L 364.01798,279.588 L 364.18498,279.765 L 364.97798,280.48 L 366.20398,280.774 L 366.51498,281.022 L 366.58298,281.121 L 366.37498,280.995 L 366.01998,280.802 L 365.04998,280.757 L 364.82898,280.887 L 364.47298,281.188 L 364.38298,281.499 L 364.27098,282.563 L 364.27898,282.626 L 364.36098,282.717 L 364.68998,282.933 L 366.77998,284.037 L 367.11398,284.015 L 367.98498,283.974 L 370.31498,284.646 L 370.91398,285.39 L 371.21598,285.808 L 371.67098,286.07 L 372.09098,285.881 L 372.17098,285.912 L 372.25298,285.989 L 372.44598,286.382 L 372.44598,286.394 L 372.40998,286.57 L 372.40998,286.579 L 372.20698,287.044 L 371.85598,287.841 L 370.83298,288.45 L 370.11098,288.004 L 368.55698,288.044 L 367.31298,286.606 L 367.27998,286.574 L 367.12798,286.427 L 367.10998,286.408 L 366.98698,286.322 L 366.98698,286.318 L 366.93898,286.3 L 366.60498,286.178 L 366.36098,286.088 L 364.79798,285.515 L 364.54998,285.447 L 364.50498,285.435 L 364.26598,285.385 L 364.17198,285.362 L 364.15298,285.362 L 364.10398,285.357 L 363.86798,285.34 L 363.53598,285.312 L 362.90098,284.74 L 363.04398,284.492 L 363.08498,284.402 L 363.08498,284.281 L 363.07098,284.213 L 362.82298,283.348 L 362.81598,283.311 L 362.74198,283.275 L 362.63898,283.222 L 362.49398,283.253 L 362.34598,283.316 L 362.06298,283.492 L 361.88598,283.708 L 361.74598,283.907 L 361.48898,283.933 L 361.38098,283.861 L 361.23298,283.704 L 361.06998,281.775 L 361.01198,281.531 L 360.56498,280.769 L 360.34498,280.513 L 359.98498,280.03 L 359.86098,279.611 L 360.06998,278.746 L 360.51598,277.98&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">75</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.677762347</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.046306744</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.01401788</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.031724677</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.614419788</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Pointe Coupee Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.009648277</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.000789404</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.363301465</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.502760044</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.978422945</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 340.40198,264.571 L 341.42898,264.837 L 341.39698,265.148 L 341.46898,266.572 L 341.49498,266.644 L 341.57698,266.721 L 341.64398,266.757 L 342.86098,267.392 L 344.64198,267.726 L 344.69998,267.753 L 344.91098,268.068 L 345.25498,268.988 L 343.64598,271.151 L 341.24798,271.26 L 340.63498,271.283 L 340.75698,270.809 L 340.81098,269.056 L 340.76098,268.623 L 340.36798,267.654 L 339.94198,266.929 L 339.77798,266.802 L 340.40198,264.571&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">77</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.602929568</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.021577055</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.009341286</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.002499781</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.633470858</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Rapides Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.016799252</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.007863965</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.31997599</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.512131934</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.974029921</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000273529</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 329.48898,258.558 L 329.65198,259.373 L 329.80098,260.037 L 329.87598,260.091 L 330.20998,260.208 L 330.50298,260.168 L 334.07698,259.154 L 335.24398,258.855 L 336.51998,260.646 L 335.82098,261.092 L 335.13698,260.771 L 335.09098,260.763 L 335.01498,260.794 L 334.91498,260.88 L 335.00598,263.341 L 335.27198,265.14 L 334.57698,265.509 L 333.45998,265.086 L 331.10698,266.527 L 328.61498,266.693 L 328.51598,265.131 L 328.38998,262.024 L 327.81298,261.204 L 327.62298,261.114 L 326.68098,260.862 L 329.48898,258.558&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">79</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.620174299</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.025970079</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.009771071</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.011845334</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.589594104</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Red River Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.006379936</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003629964</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.395446046</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.503681818</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.988890111</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000219998</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 320.99298,249.517 L 321.46198,249.522 L 324.10398,250.576 L 324.23398,250.703 L 324.49898,251.103 L 324.70698,251.753 L 324.71198,251.811 L 324.65298,252.559 L 323.63898,253.759 L 323.18398,253.965 L 322.74598,253.965 L 322.42698,253.852 L 322.36698,253.425 L 321.38498,252.7 L 321.26798,252.556 L 320.57798,251.482 L 320.15898,250.099 L 319.43498,249.554 L 320.99298,249.517&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">81</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.583544165</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.011109889</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.003409966</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.001319987</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.621423402</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Richland Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.009167672</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003088058</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.359662244</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.496883747</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.9839807</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000193004</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 342.79798,244.245 L 342.69198,244.821 L 342.56398,246.534 L 340.87898,246.624 L 340.47298,246.862 L 339.52998,247.985 L 339.03998,249.116 L 338.17398,250.027 L 336.58798,248.468 L 337.77798,245.457 L 338.17398,245.097 L 338.93098,244.559 L 339.66098,244.312 L 340.32898,243.977 L 340.43198,243.865 L 340.58098,243.595 L 340.67998,243.289 L 340.66698,243.239 L 341.11698,243.384 L 341.58998,244.294 L 342.79798,244.245&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">83</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.613462002</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.0160193</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.003811822</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.0026538</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.707918954</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Sabine Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.033590558</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.0859159</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.166137086</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.494757111</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.966161845</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 316.67998,254.701 L 321.45698,254.574 L 321.49298,256.26 L 322.61998,256.233 L 322.70198,258.505 L 323.80598,258.473 L 323.87798,260.718 L 322.17898,260.766 L 320.61098,261.993 L 320.48398,262.394 L 320.42998,263.098 L 320.45698,263.12 L 319.94398,263.255 L 319.82998,262.588 L 319.75398,262.165 L 319.42498,260.731 L 318.41498,259.266 L 317.22998,258.021 L 316.67998,254.701&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">85</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.692279124</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.033838155</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.004126604</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.002310898</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.740423991</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;St. Bernard Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.029055353</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.007242945</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.176895005</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.490423406</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.907819595</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000612865</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 362.12498,276.528 L 362.19298,276.812 L 362.30098,277.087 L 362.37298,277.21 L 362.48598,277.285 L 364.07198,278.093 L 364.42898,278.141 L 364.68098,278.111 L 364.94998,277.989 L 365.11298,277.858 L 365.17598,277.655 L 365.30298,276.839 L 365.28798,276.528 L 366.11898,275.604 L 366.50598,275.415 L 366.96998,275.559 L 367.26298,275.799 L 367.02398,275.933 L 366.95098,276.006 L 366.84398,276.109 L 366.85298,276.326 L 366.87098,276.483 L 367.52898,277.2 L 367.65498,277.295 L 368.18698,277.569 L 368.31298,277.638 L 367.56598,278.886 L 367.13298,279.525 L 366.49198,279.768 L 365.99198,279.576 L 364.81998,279.534 L 364.62998,279.594 L 364.67598,279.972 L 364.73898,280.085 L 365.29798,280.391 L 365.56498,280.504 L 365.75298,280.54 L 366.01598,280.522 L 366.56498,280.995 L 366.59598,281.071 L 366.58298,281.121 L 366.51498,281.022 L 366.20398,280.774 L 364.97798,280.48 L 364.18498,279.765 L 364.01798,279.588 L 362.36398,279.147 L 362.24198,279.192 L 362.16998,279.179 L 362.02898,279.013 L 361.78198,278.584 L 361.62498,278.255 L 362.12498,276.528&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">87</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.685489038</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.092180405</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.02654818</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.019221662</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.692307692</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;St. Charles Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.016047745</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.00325881</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.266218265</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.488551085</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.949829481</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000397878</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 354.57498,278.382 L 354.40898,277.204 L 354.39098,276.966 L 354.50798,276.776 L 354.98598,276.578 L 355.90898,275.875 L 357.24798,273.855 L 357.39698,276.74 L 357.42398,277.186 L 357.53698,277.827 L 357.60898,278.038 L 357.95098,278.566 L 358.63198,278.972 L 358.44698,280.044 L 358.38398,280.242 L 358.22198,280.742 L 356.97398,280.806 L 356.83798,280.774 L 356.73498,280.635 L 356.73098,280.557 L 356.15298,279.813 L 355.17998,278.777 L 354.57498,278.382&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">89</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.661708981</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.050170519</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.013433119</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.008336491</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.449343926</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;St. Helena Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.008122824</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003391949</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.533250022</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.517687897</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.991163081</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000357047</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 353.46298,264.147 L 353.71898,268.65 L 349.91498,268.872 L 350.54598,267.933 L 350.54598,266.991 L 350.49198,266.27 L 350.27098,265.153 L 350.60498,264.314 L 353.46298,264.147&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">91</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.446219763</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.008836919</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.004730876</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.000803356</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.480273278</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;St. James Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.006515248</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.002036015</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.505836576</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.520966827</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.988417338</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000135734</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 353.24098,274.919 L 353.11098,276.416 L 352.81398,276.628 L 353.03398,277.705 L 353.18798,278.291 L 353.28198,278.489 L 350.70798,278.427 L 349.72598,276.402 L 353.24098,274.919&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">93</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.474074744</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.011582662</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.003800561</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.001402588</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.424636356</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;St. John the Baptist Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.014393346</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003135615</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.535145022</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.562153994</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.952639143</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000479052</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 355.83198,273.232 L 357.24798,273.855 L 355.90898,275.875 L 354.98598,276.578 L 354.50798,276.776 L 354.39098,276.966 L 354.40898,277.204 L 354.57498,278.382 L 353.28198,278.489 L 353.18798,278.291 L 353.03398,277.705 L 352.81398,276.628 L 353.11098,276.416 L 353.30498,274.207 L 353.93598,274.506 L 354.05698,274.527 L 354.16998,274.51 L 354.30598,274.424 L 354.45298,274.27 L 354.59298,274.055 L 354.76098,273.684 L 354.83198,273.622 L 355.08498,273.486 L 355.83198,273.232&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">95</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.400095811</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.047360857</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.015199025</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.007011584</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.559040104</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;St. Landry Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.0126643</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003297995</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.413052864</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.524379652</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.984157632</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">9.59417</span><span class="nx">e</span><span class="o">-</span><span class="mi">05</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 339.77798,266.802 L 339.94198,266.929 L 340.36798,267.654 L 340.76098,268.623 L 340.81098,269.056 L 340.75698,270.809 L 340.63498,271.283 L 341.08098,271.895 L 341.55498,272.571 L 340.06698,272.643 L 339.98198,272.576 L 339.42398,272.377 L 338.75598,272.67 L 338.12498,273.058 L 336.45198,274.027 L 336.45198,273.743 L 336.00098,272.265 L 335.21798,271.738 L 332.45898,271.841 L 332.81198,271.256 L 332.92798,271.125 L 333.29698,271.057 L 334.99198,270.994 L 335.45598,270.593 L 335.91598,269.2 L 335.90298,268.704 L 335.87498,268.001 L 335.38398,266.978 L 339.77798,266.802&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">97</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.551964406</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.015842368</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.007939173</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.003909623</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.657841258</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;St. Martin Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.013803681</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.004256135</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.307496166</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.484660816</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.979467025</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">5.75153</span><span class="nx">e</span><span class="o">-</span><span class="mi">05</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 340.63498,271.283 L 341.24798,271.26 L 341.95598,271.932 L 342.10898,272.297 L 342.15798,272.549 L 342.18598,273.224 L 342.16198,273.379 L 342.18598,273.454 L 342.24898,273.631 L 342.64598,274.292 L 342.78898,274.41 L 342.93398,274.478 L 343.16298,274.496 L 343.51498,274.464 L 343.72298,274.506 L 343.91598,274.591 L 345.07898,276.263 L 345.19998,276.556 L 345.20998,276.726 L 343.87598,276.799 L 341.93298,276.235 L 341.83298,276.2 L 341.43298,276.114 L 341.11398,276.128 L 340.96398,276.168 L 340.75698,276.294 L 339.19298,276.83 L 338.70498,276.839 L 338.12498,273.058 L 338.75598,272.67 L 339.42398,272.377 L 339.98198,272.576 L 340.06698,272.643 L 341.55498,272.571 L 341.08098,271.895 L 340.63498,271.283M 344.12298,278.105 L 346.53498,277.791 L 346.62898,278.034 L 347.23798,279.192 L 347.40398,279.354 L 347.89198,279.449 L 348.00898,279.449 L 348.23798,279.57 L 348.37798,279.715 L 348.46398,279.882 L 348.47298,280.368 L 348.44598,281.198 L 347.12598,280.598 L 345.27398,279.742 L 344.12298,278.105&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">99</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.64860046</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.020532976</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.008934049</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.007611196</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.592973468</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;St. Mary Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.019670631</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.018188472</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.325068619</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.565935207</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.946569076</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.00053065</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 344.12298,278.105 L 345.27398,279.742 L 347.12598,280.598 L 348.44598,281.198 L 348.68898,282.126 L 346.66098,284.163 L 346.41298,284.163 L 345.93998,284.073 L 343.71798,283.591 L 343.62698,283.154 L 343.55998,282.789 L 343.40698,282.302 L 342.58198,281.022 L 342.45098,280.932 L 341.27598,280.9 L 341.10798,280.923 L 339.73798,281.324 L 341.51398,279.642 L 342.41998,278.322 L 344.12298,278.105&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">101</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.572131748</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.053430924</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.026221409</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.017346752</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.835817575</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;St. Tammany Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.018169761</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.004962779</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.113994182</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.333444982</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.953067511</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000397878</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 357.11798,267.649 L 361.72798,267.956 L 363.57998,270.507 L 363.59898,270.524 L 363.67098,270.597 L 364.36098,271.999 L 364.37798,272.238 L 364.27498,272.499 L 364.24698,272.607 L 364.25598,272.676 L 364.60898,273.346 L 364.71698,273.554 L 364.95898,273.837 L 365.04098,273.932 L 365.06898,273.95 L 365.10898,273.977 L 365.13598,273.996 L 365.15698,273.991 L 365.67198,273.96 L 364.59998,274.4 L 364.52798,274.355 L 363.90898,274.153 L 361.73398,273.981 L 361.47598,274.081 L 360.43098,274.708 L 359.19498,274.239 L 357.64098,273.915 L 357.11798,267.649&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">103</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.805668692</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.046932489</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.013942843</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.012714983</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.662328547</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Tangipahoa Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.013509831</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003162754</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.302682973</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.493763318</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.964821589</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000379861</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 353.67398,264.14 L 355.88298,263.999 L 355.96398,265.22 L 356.31098,265.509 L 357.11298,267.419 L 357.11798,267.649 L 357.64098,273.915 L 357.24798,273.855 L 355.83198,273.232 L 355.62598,273.184 L 355.48598,273.121 L 355.35498,273.014 L 354.97698,272.625 L 354.11098,271.426 L 353.84098,270.75 L 353.71898,268.65 L 353.46298,264.147 L 353.67398,264.14&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">105</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.642517982</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.035178411</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.011816973</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.006119062</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.41926885</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Tensas Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.007996954</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.001142422</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.564927647</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.512349087</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.987623762</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 342.51498,249.156 L 344.38498,249.08 L 344.43898,248.977 L 344.62798,248.842 L 345.83098,248.454 L 346.32198,248.372 L 346.38598,248.372 L 346.52698,248.489 L 346.52998,248.769 L 346.52998,248.781 L 347.62998,250.066 L 345.38998,253.335 L 344.14198,254.985 L 344.03398,255.179 L 342.21698,255.007 L 341.80698,253.344 L 342.51498,249.156&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">107</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.414699162</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.012376238</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.004950495</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.001713633</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.702583587</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Terrebonne Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.021214018</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.056740569</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.188977293</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.487720358</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.960477382</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000518505</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 349.48298,280.945 L 351.44398,280.057 L 351.51998,280.021 L 351.66898,280.039 L 354.43598,282.677 L 356.55098,284.849 L 356.71198,285.019 L 356.77898,285.21 L 356.84698,285.812 L 356.56398,287.228 L 354.85098,287.224 L 353.93598,288.247 L 354.06598,288.959 L 351.78498,289.469 L 346.73398,287.098 L 346.45298,286.877 L 346.07198,286.475 L 346.08898,286.382 L 346.70598,286.044 L 347.46398,285.606 L 347.57098,285.484 L 347.52798,285.231 L 347.37298,284.839 L 347.30498,284.691 L 347.25998,284.646 L 346.66098,284.163 L 348.68898,282.126 L 349.48298,280.945&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">109</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.686474164</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.039522618</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.019774718</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.010191311</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.690198495</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Union Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.007834162</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.002552705</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.272083095</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.466874653</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.958496545</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000748207</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 335.82098,239.034 L 335.72298,240.715 L 336.11398,241.824 L 336.14598,242.505 L 336.06498,242.681 L 336.01598,242.721 L 335.79398,243.076 L 334.37898,244.46 L 334.26698,244.537 L 333.96998,244.628 L 332.30598,244.682 L 332.26098,243.555 L 330.57498,242.622 L 330.22298,242.545 L 329.75898,242.491 L 328.86698,242.517 L 328.75798,239.224 L 335.82098,239.034&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">111</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.677699045</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.041503455</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.025174948</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.001408389</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.809013949</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Vermilion Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.014034725</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.00360351</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.142864532</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.342466148</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.976189245</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">8.62084</span><span class="nx">e</span><span class="o">-</span><span class="mi">05</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 338.56598,277.345 L 338.63498,280.306 L 337.91698,280.63 L 337.68798,280.761 L 337.13398,281.14 L 336.73198,281.517 L 336.68698,281.77 L 336.89398,282.23 L 337.14698,282.722 L 337.35398,282.753 L 338.42698,282.784 L 337.96298,283.204 L 337.90298,283.172 L 337.23198,283.172 L 336.65198,283.258 L 336.64298,283.258 L 336.04698,283.527 L 335.61798,283.844 L 335.32498,283.925 L 335.29898,283.929 L 335.22698,283.933 L 335.02798,283.947 L 334.97398,283.947 L 332.15698,283.578 L 331.50798,283.487 L 331.48998,283.487 L 331.47298,281.991 L 331.30598,277.583 L 329.93098,277.641 L 331.16998,276.89 L 331.29198,276.926 L 333.42398,277.362 L 333.62198,277.295 L 333.83898,277.195 L 334.06898,277.034 L 334.94298,276.037 L 335.77298,276.078 L 336.69998,276.384 L 337.41198,276.88 L 338.56598,277.345&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">113</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.798375834</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.023810755</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.010396731</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.020000345</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.756945771</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Vernon Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.040566362</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.014101731</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.142221118</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.460549908</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.927867161</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.00496809</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 323.87798,260.718 L 326.68098,260.862 L 327.62298,261.114 L 327.81298,261.204 L 328.38998,262.024 L 328.51598,265.131 L 328.61498,266.693 L 326.90598,266.901 L 325.18998,266.897 L 322.01198,266.982 L 320.49798,267.208 L 320.45698,263.12 L 320.42998,263.098 L 320.48398,262.394 L 320.61098,261.993 L 322.17898,260.766 L 323.87798,260.718&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">115</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.722169144</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.072132839</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.023636642</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.017560286</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.66744403</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Washington Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.011003223</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.002819708</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.310061906</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.471745312</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.981194878</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">6.36024</span><span class="nx">e</span><span class="o">-</span><span class="mi">05</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 361.52098,263.63 L 362.70598,263.549 L 362.72898,263.949 L 362.59298,264.63 L 362.48198,264.878 L 362.41298,264.887 L 362.32298,264.9 L 362.29698,264.928 L 362.15198,265.531 L 361.98498,266.355 L 361.85098,267.035 L 361.72798,267.956 L 357.11798,267.649 L 357.11298,267.419 L 356.31098,265.509 L 355.96398,265.22 L 355.88298,263.999 L 356.85198,263.94 L 361.52098,263.63&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">117</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.657628053</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.018805122</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.006275441</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.00233209</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.642342321</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Webster Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.011672774</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.003640158</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.335452714</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.487774745</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.983740627</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000194142</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 320.51598,239.422 L 323.22898,239.35 L 323.35598,243.253 L 323.90398,243.23 L 324.06698,244.298 L 324.03998,244.933 L 324.41798,246.281 L 324.43298,246.601 L 323.47698,247.21 L 322.00298,247.255 L 321.25898,247.268 L 321.16798,246.138 L 321.09698,242.734 L 320.98398,241.333 L 320.67698,241.013 L 320.29898,240.449 L 320.09698,240.089 L 320.09698,239.895 L 320.18598,239.426 L 320.51598,239.422&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">119</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.632586696</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.016259373</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.003785765</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.002912127</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.599924332</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;West Baton Rouge Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.011476375</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.00126114</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.377164957</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.514159588</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.977131327</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000546494</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 345.25498,268.988 L 345.54298,269.051 L 345.62898,269.092 L 347.56698,273.203 L 345.67898,273.306 L 345.24598,272.761 L 344.01998,271.43 L 343.64598,271.151 L 345.25498,268.988&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">121</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.585631411</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.022868673</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.0063057</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.003321002</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.818424681</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;West Carroll Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.009651844</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.004481213</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.157014823</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.329551775</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.974233023</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 344.47498,238.678 L 344.14198,239.43 L 343.74898,240.584 L 343.69898,240.963 L 343.53298,242.392 L 343.20898,243.637 L 343.10598,243.951 L 342.79798,244.245 L 341.58998,244.294 L 341.11698,243.384 L 340.66698,243.239 L 341.06298,242.126 L 342.57198,239.03 L 342.63598,238.753 L 344.47498,238.678&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">123</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.804636332</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.025766977</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.008100655</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.002326784</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.52</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;West Feliciana Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.005696</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.00128</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.464832</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.523184188</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.983936</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000192</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 341.66198,264.761 L 346.74098,264.522 L 346.58398,265.414 L 346.25998,266.901 L 345.81398,267.667 L 345.69998,267.82 L 345.53798,268.326 L 345.51698,268.749 L 345.54298,269.051 L 345.25498,268.988 L 344.91098,268.068 L 344.69998,267.753 L 344.64198,267.726 L 342.86098,267.392 L 341.64398,266.757 L 341.57698,266.721 L 341.49498,266.644 L 341.46898,266.572 L 341.39698,265.148 L 341.66198,264.761M 340.67598,264.228 L 341.42898,264.837 L 340.40198,264.571 L 340.67598,264.228&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">125</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.512128</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.016064</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.006016</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.001984</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;white&quot;</span><span class="o">:</span> <span class="mf">0.667602691</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Winn Parish&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;two_or_more&quot;</span><span class="o">:</span> <span class="mf">0.011166982</span><span class="p">,</span>
+            <span class="s2">&quot;american_indian&quot;</span><span class="o">:</span> <span class="mf">0.006530399</span><span class="p">,</span>
+            <span class="s2">&quot;black&quot;</span><span class="o">:</span> <span class="mf">0.307059361</span><span class="p">,</span>
+            <span class="s2">&quot;diversity_index&quot;</span><span class="o">:</span> <span class="mf">0.471400443</span><span class="p">,</span>
+            <span class="s2">&quot;non_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.984327042</span><span class="p">,</span>
+            <span class="s2">&quot;native_hawaiin&quot;</span><span class="o">:</span> <span class="mf">0.000130608</span><span class="p">,</span>
+            <span class="s2">&quot;svg&quot;</span><span class="o">:</span> <span class="s2">&quot;M 328.16898,250.468 L 333.63498,250.283 L 333.74398,253.104 L 333.26198,254.817 L 330.45798,254.912 L 330.47198,255.521 L 330.43098,256.044 L 326.62298,256.183 L 327.29898,254.078 L 327.49698,253.173 L 327.51598,253.015 L 327.44398,252.059 L 327.21298,251.226 L 326.81998,250.5 L 328.16898,250.468&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">127</span><span class="p">,</span>
+            <span class="s2">&quot;non_white_hispanic&quot;</span><span class="o">:</span> <span class="mf">0.660092732</span><span class="p">,</span>
+            <span class="s2">&quot;hispanic&quot;</span><span class="o">:</span> <span class="mf">0.015672958</span><span class="p">,</span>
+            <span class="s2">&quot;other&quot;</span><span class="o">:</span> <span class="mf">0.004963103</span><span class="p">,</span>
+            <span class="s2">&quot;asian&quot;</span><span class="o">:</span> <span class="mf">0.002546856</span>
+        <span class="p">}</span>
+    <span class="p">]);</span>
+  <span class="p">});</span>
+<span class="p">})();</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

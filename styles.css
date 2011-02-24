@@ -1,0 +1,64 @@
+body {
+  font-family: "AkzidenzGroteskCE";
+  background: #D1DCE9;
+}
+#cont {
+  background: white;
+  width: 740px;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid #cecece;
+  overflow: hidden;
+  box-shadow: #999 0px 3px 4px;
+}
+#map {
+  height: 300px;
+  width: 300px;
+  padding: 1em;
+  float:left;
+}
+#tool-tip {
+  position:absolute;
+  background-color: white;
+  width: 225px;
+  padding:5px;
+  display:none;
+  font-weight: bold;
+  border: 1px solid #ccc;
+  z-index: 9999;
+  -moz-box-shadow: rgba(0, 0, 0, 0.296875) 0px 2px 3px 0px;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.296875) 0px 2px 3px 0px;
+}
+#chart {
+  height: 300px;
+  width: 100px;
+  margin-left: 60px;
+  position: relative;
+  float: left;
+}
+
+.bar {
+  float:left;
+  width: 20px;
+  border: 1px solid white;
+  position: relative;
+  height: 100%;
+}
+
+.inner {
+  position:absolute;
+  width: 20px;
+  bottom: 0;
+  background-color:#CCC;
+}
+
+.legend div {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+}
+
+.white    {background-color: #FFA644;}
+.black    {background-color: #998A2F;}
+.hispanic {background-color: #2C594F;}
+.asian    {background-color: #002D40;}
