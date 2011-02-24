@@ -8,27 +8,71 @@
     <script src="mvc.js"></script>
     <script src="app.js"></script>
     <style>
+      body {
+        
+      }
       #map {
         height: 300px;
         width: 300px;
         padding: 1em;
+        float:left;
       }
       #tool-tip {
         position:absolute;
         background-color: white;
         width: 225px; font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
         padding:5px;
+        display:none;
         font-weight: bold;
         border: 1px solid #ccc;
         z-index: 9999;
         -moz-box-shadow: rgba(0, 0, 0, 0.296875) 0px 2px 3px 0px;
         -webkit-box-shadow: rgba(0, 0, 0, 0.296875) 0px 2px 3px 0px;
       }
+      #chart {
+        height: 200px;
+        width: 100px;
+        margin-left: 60px;
+        position: relative;
+        float: left;
+      }
+
+      .bar {
+        float:left;
+        width: 20px;
+        border: 1px solid white;
+        position: relative;
+        height: 100%;
+      }
+
+      .inner {
+        position:absolute;
+        width: 20px;
+        bottom: 0;
+        background-color:#CCC;
+      }
+
+      .legend div {
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+      }
+
+      .white    {background-color: #FFA644;}
+      .black    {background-color: #998A2F;}
+      .hispanic {background-color: #2C594F;}
+      .asian    {background-color: #002D40;}
     </style>
   </head>
   <body>
     <div id="map"></div>
     <div id="chart"></div>
+    <div class="legend">
+      <p><div class="white"></div> percent white</p>
+      <p><div class="black"></div> percent black</p>
+      <p><div class="hispanic"></div> percent hispanic</p>
+      <p><div class="asian"></div> percent asian</p>
+    </div>
     <div id="tool-tip"></div>
   </body>
 </html>

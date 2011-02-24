@@ -1,5 +1,5 @@
 (function(){
-  var County = window.County = Model.extend({});
+  var County = Model.extend({});
   
   var Counties = Collection.extend({    
     model: County
@@ -54,15 +54,11 @@
       path.hover(function(){
         path.attr({"fill": "#D1DCE9"});
         map.toolTip.html(model.get("name") + "<br>Diversity Index: " + (model.get("diversity_index") * 100 | 0) + "%");
+        model.trigger("current", model);
       }, 
       function(){
         path.attr({"fill": "white"});
       });
-      
-      path.click(function(){
-        model.trigger("current");
-      });
-      
     }
     
   });
@@ -75,14 +71,23 @@
       });
     },
     
-    drawChart : function(){
-      console.log("huzzah")
+    drawChart : function(e, model){
+      this.el.html("");
+      var showFields = ["white", "black",  "hispanic", "asian"];
+      for(var i = 0; i < showFields.length; i++){
+        var bar = $("<div />");
+        bar.addClass("bar");
+        var inner = $("<div />");
+        inner.addClass("inner").addClass(showFields[i]).css({"height": model.get(showFields[i]) * 100 + "%"});
+        bar.append(inner)
+        this.el.append(bar)
+      }
     }
   });
   
   $(document).ready(function(){
     
-    var counties = window.counties = new Counties();
+    var counties = new Counties();
     
     var barChart = new BarChart({
       el : $("#chart"),
