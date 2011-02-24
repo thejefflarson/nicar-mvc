@@ -1,17 +1,35 @@
 (function(){
+  
+  // Models
+  // ------
+  
+  // Each county will contain the associated census data. It doesn't need anymore
+  // functionalit than the original model, so we wont pass anything in.
   var County = Model.extend({});
   
+  // The Counties collection just needs to know to create a County constructor
+  // when data is passed to `populate`
   var Counties = Collection.extend({    
     model: County
   });
   
+  // Views
+  // -----
+  
+  // The Map is our most complex view. It keeps track of a ToolTip and proxies
+  // to raphael to draw the SVG shapes.
   var Map = View.extend({
+    
+    // The set of bindings and associated functions to call when events are 
+    // triggered.
     bindings : {
       "mousemove": "moveToolTip",
       "mouseleave": "hideToolTip",
       "mouseenter": "showToolTip"
     },
     
+    // Upon initialization the map will begin listening in on the counties collection
+    // so it can draw the map when a model is added.
     initialize : function(){
       var map = this;
       this.collection.bind("add", function(){ 
@@ -19,14 +37,18 @@
       });
     },
 
+    // Hide the DOM element that contains the tooltip when the mouseleaves the 
+    // map.
     hideToolTip: function(e){
       this.toolTip.hide();
     },
 
+    // And show the tooltip when it enters.
     showToolTip : function(){
       this.toolTip.show();
     },
     
+    // Move the toolTip as the user mouses around.
     moveToolTip : function(e){
       this.toolTip.css({
         left : e.pageX + 10,
@@ -34,11 +56,15 @@
       });
     },
     
+    // To render the map we first need to setup the Raphael canvas. 
+    // (The second line here is not cross browser compatible).
     render : function(){
       this.paper = Raphael(this.el[0], this.el.width(), this.el.height());
       this.paper.canvas.setAttribute('viewBox', [314.56698, 238.637, 57.87900000000002, 50.831999999999994].join(" "));
     },
     
+    // Every time a county is added to a collection this function is called.
+    // It sets up some styles and triggers events to notify the bar chart.
     drawShape : function(e, model, collection){
       var map  = this;
       var path = this.paper.path(model.get("svg"));
@@ -63,7 +89,11 @@
     
   });
   
+  // The BarChart view displays a simple barchart showing ethnicity breakdowns.
   var BarChart = View.extend({
+    
+    // On creation the BarChart starts listening to any `current` events, so
+    // it can update it's associated DOM Element.
     initialize : function(){
       var chart = this;
       this.collection.bind("current", function(){ 
@@ -71,6 +101,8 @@
       });
     },
     
+    // The callback for the `current` event. In here the barchart will reset the
+    // html and recreate a barchart from scratch.
     drawChart : function(e, model){
       this.el.html("");
       var showFields = ["white", "black",  "hispanic", "asian"];
@@ -85,22 +117,34 @@
     }
   });
   
+  // Setting Up The Room
+  // -------------------
+  
+  // After the document is ready we'll grab a bunch of jQuery references and 
+  // construct the Views
   $(document).ready(function(){
     
+    // First we'll set up the collection.
     var counties = new Counties();
     
+    // Then we'll grab a reference to the BarChart container
     var barChart = new BarChart({
       el : $("#chart"),
       collection : counties
     });
     
+    // And set up the map with the toolTip reference.
     var map = new Map({
       collection : counties,
       el : $("#map"),
       toolTip : $("#tool-tip")
     });
+    
+    // We'll also need a Raphael Canvas
     map.render();
     
+    // And finally we'll populate the data which will trigger `add` events to notify
+    // the map View.
     counties.populate([
         {
             "white": 0.795282729,
