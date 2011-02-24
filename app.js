@@ -1,13 +1,102 @@
 (function(){
+  var County = window.County = Model.extend({});
+  
+  var Counties = Collection.extend({    
+    model: County
+  });
+  
   var Map = View.extend({
+    bindings : {
+      "mousemove": "moveToolTip",
+      "mouseleave": "hideToolTip",
+      "mouseenter": "showToolTip"
+    },
+    
+    initialize : function(){
+      var map = this;
+      this.collection.bind("add", function(){ 
+        map.drawShape.apply(map, arguments);
+      });
+    },
+
+    hideToolTip: function(e){
+      this.toolTip.hide();
+    },
+
+    showToolTip : function(){
+      this.toolTip.show();
+    },
+    
+    moveToolTip : function(e){
+      this.toolTip.css({
+        left : e.pageX + 10,
+        top : e.pageY + 10
+      });
+    },
+    
+    render : function(){
+      this.paper = Raphael(this.el[0], this.el.width(), this.el.height());
+      this.paper.canvas.setAttribute('viewBox', [314.56698, 238.637, 57.87900000000002, 50.831999999999994].join(" "));
+    },
+    
+    drawShape : function(e, model, collection){
+      var map  = this;
+      var path = this.paper.path(model.get("svg"));
+      
+      path.attr({
+        "stroke": "black",
+        "vector-effect":"non-scaling-stroke",
+        "stroke-width": 0.1, 
+        "fill": "white",
+        "cursor": "pointer"
+      });
+      
+      path.hover(function(){
+        path.attr({"fill": "#D1DCE9"});
+        map.toolTip.html(model.get("name") + "<br>Diversity Index: " + (model.get("diversity_index") * 100 | 0) + "%");
+      }, 
+      function(){
+        path.attr({"fill": "white"});
+      });
+      
+      path.click(function(){
+        model.trigger("current");
+      });
+      
+    }
     
   });
+  
+  var BarChart = View.extend({
+    initialize : function(){
+      var chart = this;
+      this.collection.bind("current", function(){ 
+        chart.drawChart.apply(chart, arguments);
+      });
+    },
+    
+    drawChart : function(){
+      console.log("huzzah")
+    }
+  });
+  
   $(document).ready(function(){
     
+    var counties = window.counties = new Counties();
     
+    var barChart = new BarChart({
+      el : $("#chart"),
+      collection : counties
+    });
     
+    var map = new Map({
+      collection : counties,
+      el : $("#map"),
+      toolTip : $("#tool-tip")
+    });
+    map.render();
     
-    Counties.populate([
+    counties.populate([
         {
             "white": 0.795282729,
             "name": "Acadia Parish",

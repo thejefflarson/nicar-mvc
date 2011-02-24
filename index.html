@@ -2,11 +2,33 @@
 <html>
   <head>
     <title></title>
+    <script src="vendor/jquery-1.5.min.js"></script>
+    <script src="vendor/raphael-min.js"></script>
+
     <script src="mvc.js"></script>
+    <script src="app.js"></script>
+    <style>
+      #map {
+        height: 300px;
+        width: 300px;
+        padding: 1em;
+      }
+      #tool-tip {
+        position:absolute;
+        background-color: white;
+        width: 225px; font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        padding:5px;
+        font-weight: bold;
+        border: 1px solid #ccc;
+        z-index: 9999;
+        -moz-box-shadow: rgba(0, 0, 0, 0.296875) 0px 2px 3px 0px;
+        -webkit-box-shadow: rgba(0, 0, 0, 0.296875) 0px 2px 3px 0px;
+      }
+    </style>
   </head>
   <body>
-
-    <script>
-    </script>
+    <div id="map"></div>
+    <div id="chart"></div>
+    <div id="tool-tip"></div>
   </body>
 </html>

@@ -31,16 +31,15 @@
     // `trigger` fires an event and the associated callbacks
     trigger : function(e){
       if(!this._callbacks) return;
-      var list = this._callbacks[e];
-      if(!list) return;
       
-      for(var i = 0; i < list.length; i++) 
-        list[i].apply(this, arguments);
-        
-      if(list['all']) {
-        for(i = 0; i < list['all'].length; i++) 
-          list['all'][i].apply(this, arguments);
-      }
+      var list;
+      if(list = this._callbacks[e])
+        for(var i = 0; i < list.length; i++) 
+          list[i].apply(this, arguments);
+      
+      if(list = this._callbacks['all'])
+        for(i = 0; i < list.length; i++) 
+          list[i].apply(this, arguments);
     }
   };
   
@@ -140,7 +139,7 @@
   // object has a unique id, and provides niceties like string formatting.
   var idCounter = 1;
   var MVCObject = function(attributes){
-    this.cid = this.type + idCounter++;
+    this.cid = this.type + "-" + idCounter++;
     if(this.initialize) this.initialize(attributes);
   };
   MVCObject.prototype.type = "MVCObject";
@@ -173,38 +172,39 @@
   // Each collection holds a bunch of models, and passes through any associated
   // Events. It's inspired by the Google Maps API [MVCArray](http://code.google.com/apis/maps/documentation/javascript/reference.html#MVCArray).
   var Collection = MVCObject.extend({
-    
+    type: "Collection",
     // The model the collection creates when needed.
     model : Model,
     
-    // The constructor function initializes an empty array of models
+    // The constructor function initializes an empty array of models, and sets
+    // up a passthrough model event
     constructor : function(attributes, options){
       this.models = [];
+      this.length = 0;
+      var coll = this;
+      this._boundOnModelEvent = function(){ coll._onModelEvent.apply(coll, arguments); }
       MVCObject.call(this, options);
     },
     
     // `push` adds a model instance to the internal array, and fires an `added`
     // event
-    push : function(object){
-      if(!(object instanceof Model)) object = new this.model(object);
-      object.collection = this;
-      model.bind('all', this._onModelEvent);
-      this.models.push(object);
-      this.trigger("added:" + model.cid, model, this);
+    push : function(model){
+      if(!(model instanceof Model)) model = new this.model(model);
+      model.collection = this;
+      model.bind('all', this._boundOnModelEvent);
+      this.models.push(model);
+      model.trigger("add", model, this);
+      this.length++;
       return model;
     },
     
     // `pop` removes a model from the collection and triggers a `removed` event
-    pop : function(object){
-      var model = this.models.pop(object);
-      model.unbind('all', this._onModelEvent);
-      this.trigger("removed:" + model.cid, model, this);
+    pop : function(){
+      var model = this.models.pop();
+      model.trigger("remove", model, this);
+      model.unbind('all', this._boundOnModelEvent);
+      this.length--;
       return model;
-    },
-    
-    // The length of the collection
-    length : function(){
-      return this.models.length;
     },
     
     // A simple iterator over the items in the models array.
@@ -249,10 +249,11 @@
     bindings : {},
     
     // To create a view we'll pass in an attributes object that optionally contains
-    // a DOM element to store.
+    // a DOM element to store. Also, we'll mixin the passed in attributes directly
+    // to the view instance
     constructor : function(attributes){
       attributes = (attributes || {});
-      if(attributes.el) this.el = attributes.el;
+      mixin(this, attributes);
       if(this.el) this.setBindings();
       MVCObject.call(this, attributes);
     },
@@ -296,9 +297,11 @@
       this.el.unbind(suffix);
       var view = this;
       for(var ev in this.bindings){
-        var method   = this[this.bindings[ev]];
-        var callback = function() { method.call(view, Array.prototype.slice.call(arguments)); };
-        this.el.bind(ev + suffix, callback);
+        (function(ev){
+          var method   = view[view.bindings[ev]];
+          var callback = function() { method.apply(view, Array.prototype.slice.call(arguments)); };
+          view.el.live(ev + suffix, callback);
+        })(ev);
       }
     },
     
